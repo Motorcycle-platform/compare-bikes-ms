@@ -7,8 +7,6 @@ import { JwtService } from '@nestjs/jwt';
 //import { JwtPayload } from './interfaces/';
 
 import { RegisterUserDto, LoginUserDto } from './dto';
-//import { PrismaClient } from '@prisma/client/extension';
-
 @Injectable()
 export class AuthService extends PrismaClient implements OnModuleInit {
 
@@ -51,6 +49,36 @@ export class AuthService extends PrismaClient implements OnModuleInit {
       return {
         user: rest,
         //token: await this.sign
+      }
+    }
+    catch (error){
+      throw new UnauthorizedException(error.message + 'last catch');
+    }
+  }
+
+  async loginUser(loginUserDto: LoginUserDto) {
+    const { email, password } = loginUserDto;
+
+    try {
+      const user = await this.user.findUnique({
+        where: { email: loginUserDto.email },
+      });
+
+      if (!user) {
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+
+      if (!isPasswordValid) {
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
+      const { password: __, ...rest} = user;
+
+      return {
+        user: rest,
+       // token: await this.signJWT(rest),
       }
     }
     catch (error){

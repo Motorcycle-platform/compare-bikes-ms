@@ -15,4 +15,9 @@ export class AuthController {
     return this.authService.registerUser(registerUserDto);
   }
 
+  @Post('/login')
+  loginUser(@Body() loginUserDto: LoginUserDto) {
+    return this.authService.loginUser(loginUserDto);
+  }
+
 }
