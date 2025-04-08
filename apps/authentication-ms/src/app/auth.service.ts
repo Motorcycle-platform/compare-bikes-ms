@@ -1,10 +1,9 @@
 import { Injectable, Logger, OnModuleInit, UnauthorizedException } from '@nestjs/common';
-import { RpcException } from '@nestjs/microservices';
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 import { JwtService } from '@nestjs/jwt';
-//import { JwtPayload } from './interfaces/';
+import { JwtPayload } from './interfaces/jwt-payload.interface';
 
 import { RegisterUserDto, LoginUserDto } from './dto';
 @Injectable()
@@ -12,15 +11,23 @@ export class AuthService extends PrismaClient implements OnModuleInit {
 
   private readonly logger = new Logger(AuthService.name);
 
+  constructor(private readonly jwtService: JwtService) {
+    super();
+  }
+
   onModuleInit(){
     this.$connect();
     this.logger.log('[AuthService] Initialized Module');
   }
 
+  async signJWT(paylod: JwtPayload ){
+    return this.jwtService.sign(paylod);
+  }
+
   async registerUser(registerUserDto: RegisterUserDto) {
 
     // extract info
-    const { name, email, password,phone, address, role, isActive, createdAt, updatedAt } = registerUserDto;
+    const { name, email, password,phone, address, role, isActive} = registerUserDto;
     try{
       const user = await this.user.findUnique({
         where: { email: registerUserDto.email },
@@ -39,8 +46,6 @@ export class AuthService extends PrismaClient implements OnModuleInit {
           address : address,
           role : role,
           isActive : isActive,
-          //createdAt : createdAt
-          //updatedAt : updatedAt
         },
       });
 
@@ -48,7 +53,7 @@ export class AuthService extends PrismaClient implements OnModuleInit {
 
       return {
         user: rest,
-        //token: await this.sign
+        token: await this.signJWT(rest),
       }
     }
     catch (error){
@@ -61,7 +66,7 @@ export class AuthService extends PrismaClient implements OnModuleInit {
 
     try {
       const user = await this.user.findUnique({
-        where: { email: loginUserDto.email },
+        where: { email: email },
       });
 
       if (!user) {
@@ -78,7 +83,7 @@ export class AuthService extends PrismaClient implements OnModuleInit {
 
       return {
         user: rest,
-       // token: await this.signJWT(rest),
+        token: await this.signJWT(rest),
       }
     }
     catch (error){
