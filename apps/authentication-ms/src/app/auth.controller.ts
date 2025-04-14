@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Controller, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { RegisterUserDto, LoginUserDto } from './dto';
@@ -9,19 +9,18 @@ export class AuthController {
 
   constructor(private readonly authService: AuthService) {}
 
-  //@MessagePattern('app.register.user')
-  @Post('/register')
-  registerUser(@Body() registerUserDto: RegisterUserDto) {
+  @MessagePattern('auth.register.user')
+  registerUser(@Payload() registerUserDto: RegisterUserDto) {
     console.log(registerUserDto);
     return this.authService.registerUser(registerUserDto);
   }
 
-  @Post('/login')
-  loginUser(@Body() loginUserDto: LoginUserDto) {
+  @MessagePattern('auth.login.user')
+  loginUser(@Payload() loginUserDto: LoginUserDto) {
     return this.authService.loginUser(loginUserDto);
   }
 
-  @Get('/other')
+  @MessagePattern('auth.verify.user')
   @UseGuards(AuthGuard)
   other () {
     return 'other';

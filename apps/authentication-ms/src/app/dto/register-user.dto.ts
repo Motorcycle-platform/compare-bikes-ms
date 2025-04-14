@@ -1,4 +1,4 @@
-import { IsBoolean, IsDate, IsEmail, IsString, IsStrongPassword } from 'class-validator';
+import { IsBoolean, IsEmail, IsString, IsStrongPassword } from 'class-validator';
 
 export class RegisterUserDto {
 
@@ -24,9 +24,4 @@ export class RegisterUserDto {
   @IsBoolean()
   isActive: boolean;
 
-  @IsDate()
-  createdAt: Date;
-
-  @IsDate()
-  updatedAt: Date;
 }
